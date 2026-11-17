@@ -1291,12 +1291,13 @@ function openDB() {
           e.stopPropagation();
           const isInside = row.classList.contains('drag-inside');
           const isBefore = row.classList.contains('drag-before');
+          const files = Array.from(e.dataTransfer?.files || []);
           clearDragClasses();
 
-          if (!draggedType && e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          if (!draggedType && files.length > 0) {
             folder.collapsed = false;
             await dbPut('folders', folder);
-            await importExternalFiles(e.dataTransfer.files, folder.id);
+            await importExternalFiles(files, folder.id);
             return;
           }
 
@@ -1966,7 +1967,12 @@ function openDB() {
     recordBtn.textContent = '■ Stop';
   });
 
-  openDB().then(() => refreshLibrary());
+  openDB().then(() => {
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist();
+  }
+  refreshLibrary();
+  });
 </script>
 </body>
 </html>
